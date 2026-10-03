@@ -1,3 +1,4 @@
+
 name: Build MTA Voice Bridge
 
 on:
@@ -20,32 +21,30 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
       - name: Generate Visual Studio project
         shell: cmd
         run: utils\premake5 vs2019
 
-      - name: Build Windows x64 DLL
+      - name: Build Windows x64
         shell: cmd
-        run: |
-          msbuild Build\Base.sln /m /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
+        run: msbuild Build\Base.sln /m /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
 
-      - name: Verify DLL
+      - name: List build output
         shell: pwsh
         run: |
-          $dll = "Bin/Release/ml_voicebridge.dll"
-
-          if (!(Test-Path $dll)) {
-            Write-Error "DLL not found: $dll"
+          if (Test-Path Bin) {
             Get-ChildItem Bin -Recurse
+          } else {
+            Write-Error "Bin directory was not generated."
             exit 1
           }
 
-          Write-Host "DLL successfully built:"
-          Get-Item $dll
-
-      - name: Upload DLL
+      - name: Upload build output
         uses: actions/upload-artifact@v4
         with:
-          name: ml_voicebridge-windows-x64
-          path: Bin/Release/ml_voicebridge.dll
+          name: mta-voice-bridge-windows-x64
+          path: Bin/**
           if-no-files-found: error
