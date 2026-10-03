@@ -1,36 +1,37 @@
 project "module"
-	language "C++"
-	cppdialect "C++17"
-	kind "SharedLib"
-	targetname "ml_base"
-	
-	includedirs { "include" }
-	libdirs { "lib" }
+    language "C++"
+    cppdialect "C++17"
+    kind "SharedLib"
+    targetname "ml_voicebridge"
 
-	vpaths {
-		["Headers/*"] = "**.h",
-		["Sources/*"] = "**.cpp",
-		["*"] = "premake5.lua"
-	}
+    includedirs { "include" }
+    libdirs { "lib" }
 
-	files {
-		"premake5.lua",
-		"**.cpp",
-		"**.h"
-	}
-	
-	filter { "system:windows" }
-		debugdir "../mta-server"
-		
-	filter { "system:windows", "platforms:x86" }
-		links { "lua5.1.lib" }
-		debugcommand "../mta-server/MTA Server.exe"
-		
-	filter { "system:windows", "platforms:x64" }
-		links { "lua5.1_64.lib" }
-		debugcommand "../mta-server/MTA Server64.exe"
+    vpaths {
+        ["Headers/*"] = "**.h",
+        ["Sources/*"] = "**.cpp",
+        ["*"] = "premake5.lua"
+    }
 
-	-- filter "system:linux"
+    files {
+        "premake5.lua",
+        "**.cpp",
+        "**.h"
+    }
 
-	filter "system:not linux"
-		excludes { "luaimports/luaimports.linux.h", "luaimports/luaimports.linux.cpp" }
+    filter { "system:windows" }
+        debugdir "../mta-server"
+
+    filter { "system:windows", "platforms:x86" }
+        links { "lua5.1.lib" }
+        debugcommand "../mta-server/MTA Server.exe"
+
+    filter { "system:windows", "platforms:x64" }
+        links { "lua5.1_64.lib" }
+        debugcommand "../mta-server/MTA Server64.exe"
+
+    filter "system:not linux"
+        excludes {
+            "luaimports/luaimports.linux.h",
+            "luaimports/luaimports.linux.cpp"
+        }
