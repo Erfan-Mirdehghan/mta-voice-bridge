@@ -30,7 +30,7 @@ jobs:
 
       - name: Build Windows x64
         shell: cmd
-        run: msbuild Build\Base.sln /m /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
+        run: msbuild Build\Base.sln /m /p:Configuration=Release /p:Platform=Win32 /verbosity:minimal
 
       - name: List build output
         shell: pwsh
