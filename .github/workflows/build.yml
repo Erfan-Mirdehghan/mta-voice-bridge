@@ -3,6 +3,7 @@ name: Build MTA Voice Bridge
 on:
   push:
     branches:
+      - master
       - main
   workflow_dispatch:
 
@@ -14,55 +15,37 @@ jobs:
     runs-on: windows-2022
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
 
       - name: Generate Visual Studio project
         shell: cmd
-        run: utils\premake5.exe vs2022
+        run: utils\premake5 vs2019
 
-      - name: Build x64 Release
+      - name: Build Windows x64 DLL
+        shell: cmd
+        run: |
+          msbuild Build\Base.sln /m /p:Configuration=Release /p:Platform=x64 /verbosity:minimal
+
+      - name: Verify DLL
         shell: pwsh
         run: |
-          $solution = Get-ChildItem -Path Build -Filter *.sln -Recurse |
-            Select-Object -First 1
+          $dll = "Bin/Release/ml_voicebridge.dll"
 
-          if (-not $solution) {
-            Write-Error "No Visual Studio solution was generated."
+          if (!(Test-Path $dll)) {
+            Write-Error "DLL not found: $dll"
+            Get-ChildItem Bin -Recurse
             exit 1
           }
 
-          Write-Host "Building solution: $($solution.FullName)"
-
-          & msbuild $solution.FullName `
-            /m `
-            /p:Configuration=Release `
-            /p:Platform=x64 `
-            /verbosity:minimal
-
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-
-      - name: Find DLL
-        shell: pwsh
-        run: |
-          $dll = Get-ChildItem -Path Bin -Filter ml_voicebridge.dll -Recurse |
-            Select-Object -First 1
-
-          if (-not $dll) {
-            Write-Error "ml_voicebridge.dll was not found."
-            Get-ChildItem -Path Bin -Recurse
-            exit 1
-          }
-
-          Write-Host "DLL found: $($dll.FullName)"
+          Write-Host "DLL successfully built:"
+          Get-Item $dll
 
       - name: Upload DLL
         uses: actions/upload-artifact@v4
         with:
           name: ml_voicebridge-windows-x64
-          path: Bin/**/ml_voicebridge.dll
+          path: Bin/Release/ml_voicebridge.dll
           if-no-files-found: error
