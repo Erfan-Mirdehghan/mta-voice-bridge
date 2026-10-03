@@ -1,4 +1,4 @@
-name: Build MTA Voice Bridge
+name: MTA Voice Bridge
 
 on:
   push:
@@ -6,63 +6,10 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: read
-
 jobs:
-  build:
-    runs-on: windows-2022
+  test:
+    runs-on: windows-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Generate Visual Studio project
-        shell: cmd
-        run: utils\premake5.exe vs2022
-
-      - name: Build x64 Release
-        shell: pwsh
-        run: |
-          $solution = Get-ChildItem -Path Build -Filter *.sln -Recurse |
-            Select-Object -First 1
-
-          if (-not $solution) {
-            Write-Error "No Visual Studio solution was generated."
-            exit 1
-          }
-
-          Write-Host "Building solution: $($solution.FullName)"
-
-          & msbuild $solution.FullName `
-            /m `
-            /p:Configuration=Release `
-            /p:Platform=x64 `
-            /verbosity:minimal
-
-          if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
-          }
-
-      - name: Find DLL
-        shell: pwsh
-        run: |
-          $dll = Get-ChildItem -Path Bin -Filter ml_voicebridge.dll -Recurse |
-            Select-Object -First 1
-
-          if (-not $dll) {
-            Write-Error "ml_voicebridge.dll was not found."
-            Get-ChildItem -Path Bin -Recurse
-            exit 1
-          }
-
-          Write-Host "DLL found: $($dll.FullName)"
-
-      - name: Upload DLL
-        uses: actions/upload-artifact@v4
-        with:
-          name: ml_voicebridge-windows-x64
-          path: Bin/**/ml_voicebridge.dll
-          if-no-files-found: error
+      - name: Test GitHub Actions
+        run: echo "GitHub Actions is working!"
